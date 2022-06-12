@@ -1,0 +1,20 @@
+.jumbotron {
+    background-image: url("../images/peach.png");
+    background-size: 100% 100%;
+    text-align: center;
+    font-family: "Lucida Console", "Courier New", monospace;
+}
+body {
+    font-family: "Lucida Console", "Courier New", monospace;
+}
+
+.panel > .panel-heading {
+    background-image: none;
+    background-color: indianred;
+    border-color: indianred;
+    color: white;
+}
+
+.panel-primary {
+    border-color: indianred;
+}

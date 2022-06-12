@@ -3,7 +3,7 @@ function init() {
   var selector = d3.select("#selDataset");
 
   // Use the list of sample names to populate the select options
-  d3.json("samples.json").then((data) => {
+  d3.json("static/js/samples.json").then((data) => {
     var sampleNames = data.names;
 
     sampleNames.forEach((sample) => {
@@ -32,8 +32,10 @@ function optionChanged(newSample) {
 
 // Demographics Panel 
 function buildMetadata(sample) {
-  d3.json("samples.json").then((data) => {
+  d3.json("static/js/samples.json").then((data) => {
     var metadata = data.metadata;
+    
+
     // Filter the data for the object with the desired sample number
     var resultArray = metadata.filter(sampleObj => sampleObj.id == sample);
     var result = resultArray[0];
@@ -50,20 +52,21 @@ function buildMetadata(sample) {
     Object.entries(result).forEach(([key, value]) => {
       PANEL.append("h6").text(`${key.toUpperCase()}: ${value}`);
     });
-
   });
 }
 
 // 1. Create the buildCharts function.
-function buildCharts(sample) {
+function buildCharts(sample,buildMetadata) {
   // 2. Use d3.json to load and retrieve the samples.json file 
-  d3.json("samples.json").then((data) => {
+  d3.json("static/js/samples.json").then((data) => {
     // 3. Create a variable that holds the samples array. 
     var sampleData = data.samples;
+
     // 4. Create a variable that filters the samples for the object with the desired sample number.
     var resultArray = sampleData.filter(sampleObj => sampleObj.id == sample);
     //  5. Create a variable that holds the first sample in the array.
     var result = resultArray[0];
+    // console.log(result)
 
     // 6. Create variables that hold the otu_ids, otu_labels, and sample_values.
     var ids = result.otu_ids.slice(0,10).reverse();
@@ -81,13 +84,18 @@ function buildCharts(sample) {
 			y: ids.map(outId => `OTU ${outId}`),
 			text: yticks,
 			type: "bar",
-			orientation: "h"
+			orientation: "h",
+      marker: {
+        color: 'indianred'
+      }
+      // marker{color:"lightcoral"}
     }];
     // 9. Create the layout for the bar chart. 
     var barLayout = {
-      title: 'Top 10 Bacteria Cultures Found',
-      xaxis: { title: "Sample Value"},
-      yaxis: { title: "OTU ID"},
+      title: '<b>Top 10 Bacteria Cultures Found</b>',
+      font: { family: 'Courier New, monospace' },
+      xaxis: { title: "<b>Sample Value</b>", font: { family: 'Courier New, monospace' },},
+      yaxis: { title: "<b>OTU ID</b>", font: { family: 'Courier New, monospace' },},
       autosize: false,
       width: 450,
       height: 600
@@ -112,7 +120,8 @@ function buildCharts(sample) {
 		
     // 2. Create the layout for the bubble chart.
 		var bubbleLayout = {
-      title: 'Bacteria Cultures per Sample',
+      title: '<b>Bacteria Cultures per Sample</b>',
+      font: { family: 'Courier New, monospace' },
 			xaxis: { title: "OTU ID"},
 			yaxis: { title: "Sample Value"}, 
       showlegend: false
@@ -120,5 +129,50 @@ function buildCharts(sample) {
 		
     // 3. Use Plotly to plot the data with the layout.
 		Plotly.newPlot('bubble', bubbleData, bubbleLayout);
+
+    // 3. Create a variable that holds the washing frequency.
+    var metaData = data.metadata.filter(sampleObj => sampleObj.id == sample);
+    var washFrequency = parseFloat(metaData[0].wfreq);
+    // console.log(washFrequency);
+
+    // 4. Create the trace for the gauge chart.
+    var gaugeData = [
+      {
+        domain: { x: [0, 1], y: [0, 1] },
+        value: washFrequency,
+        title: { text: '<b>Belly Button Washing Frequency</b> <br> Scrubs per week',
+            // font-family: "Lucida Console", "Courier New", monospace;
+            font: {
+              family: 'Courier New, monospace'
+            }},
+        type: "indicator",
+        mode: "gauge+number",gauge: {
+          axis: { range: [0, 10] },
+          steps: [
+            { range: [0, 2], color: "oldlace" },
+            { range: [2, 4], color: "antiquewhite" },
+            { range: [4, 6], color: "bisque" },
+            { range: [6, 8], color: "peachpuff" },
+            { range: [8, 10], color: "lightsalmon" }
+          ],
+          threshold: {
+            line: { color: "indianred", width: 4 },
+            thickness: 0.75,
+            value: 9
+          }
+        }
+      }
+    ];
+    
+    // 5. Create the layout for the gauge chart.
+    var gaugeLayout = { 
+      margin: { t: 0, b: 0 }
+    };
+
+    // 6. Use Plotly to plot the gauge data and layout.
+    Plotly.newPlot('gauge', gaugeData, gaugeLayout);
   });
 }
+
+// var layout = 
+// Plotly.newPlot('myDiv', data, layout);
